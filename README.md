@@ -30,8 +30,7 @@ Terraform-managed AWS Lightsail deployment for `openclaw/claudbot` (agent name: 
 ## 1) Bootstrap Terraform remote state
 
 ```bash
-cp terraform/bootstrap/terraform.tfvars.example terraform/bootstrap/terraform.tfvars
-# edit values
+# create terraform/bootstrap/terraform.tfvars with your bucket/table/profile values
 terraform -chdir=terraform/bootstrap init
 terraform -chdir=terraform/bootstrap apply
 ```
@@ -43,9 +42,8 @@ Capture outputs:
 ## 2) Configure and deploy infrastructure
 
 ```bash
-cp terraform/envs/prod/backend.hcl.example terraform/envs/prod/backend.hcl
-cp terraform/envs/prod/terraform.tfvars.example terraform/envs/prod/terraform.tfvars
-# edit backend.hcl + terraform.tfvars
+# edit terraform/envs/prod/backend.hcl
+# create terraform/envs/prod/terraform.tfvars (ignored by git)
 terraform -chdir=terraform/envs/prod init -backend-config=backend.hcl
 terraform -chdir=terraform/envs/prod plan
 terraform -chdir=terraform/envs/prod apply
@@ -63,9 +61,12 @@ sudo nano /opt/paige/.env
 sudo systemctl restart paige-claudbot
 ```
 
+Use [`.env.example`](/Volumes/tom-macmini-ssd-2tb/Documents/New%20project/.env.example) in this repo as the key template.
+
 ## 4) Slack onboarding
 
 See [`docs/slack-setup.md`](docs/slack-setup.md).
+Slack app manifest: [`slack/app-manifest.yaml`](slack/app-manifest.yaml).
 
 ## 5) Paige operating model
 

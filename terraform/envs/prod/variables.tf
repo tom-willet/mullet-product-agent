@@ -63,16 +63,22 @@ variable "snapshot_time_utc" {
   default     = "07:00"
 }
 
-variable "claudbot_repo_url" {
-  description = "Repository URL for openclaw/claudbot"
+variable "openclaw_repo_url" {
+  description = "Repository URL for openclaw source"
   type        = string
-  default     = "https://github.com/openclaw/claudbot.git"
+  default     = "https://github.com/openclaw/openclaw.git"
 }
 
-variable "claudbot_repo_ref" {
+variable "openclaw_repo_ref" {
   description = "Git ref to deploy"
   type        = string
   default     = "main"
+}
+
+variable "openclaw_image" {
+  description = "Prebuilt OpenClaw image to run on low-memory instances"
+  type        = string
+  default     = "ghcr.io/openclaw/openclaw:latest"
 }
 
 variable "deploy_user" {

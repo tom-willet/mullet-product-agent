@@ -12,8 +12,9 @@ resource "aws_lightsail_instance" "paige" {
 
   user_data = templatefile("${path.module}/templates/cloud-init.sh.tftpl", {
     deploy_user       = var.deploy_user
-    claudbot_repo_url = var.claudbot_repo_url
-    claudbot_repo_ref = var.claudbot_repo_ref
+    openclaw_repo_url = var.openclaw_repo_url
+    openclaw_repo_ref = var.openclaw_repo_ref
+    openclaw_image    = var.openclaw_image
   })
 
   add_on {
@@ -32,6 +33,10 @@ resource "aws_lightsail_static_ip" "paige" {
 resource "aws_lightsail_static_ip_attachment" "paige" {
   static_ip_name = aws_lightsail_static_ip.paige.name
   instance_name  = aws_lightsail_instance.paige.name
+
+  lifecycle {
+    replace_triggered_by = [aws_lightsail_instance.paige.id]
+  }
 }
 
 resource "aws_lightsail_instance_public_ports" "paige" {

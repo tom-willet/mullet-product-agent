@@ -6,11 +6,21 @@ Socket Mode avoids public ingress and custom domain requirements. Paige opens an
 
 ## Minimum flow
 
-1. Create Slack app in your workspace.
-2. Enable Socket Mode and generate an app-level token.
-3. Add bot scopes and install app to workspace.
-4. Configure event subscriptions (or commands) required by claudbot.
+1. Create Slack app from manifest using [`slack/app-manifest.yaml`](/Volumes/tom-macmini-ssd-2tb/Documents/New%20project/slack/app-manifest.yaml).
+2. Enable Socket Mode and generate an app-level token (`xapp-...`) if not already enabled.
+3. Install app to workspace to generate the bot token (`xoxb-...`).
+4. Add required Slack secrets to `/opt/paige/.env`.
 5. Set owner-only allowlist in app config.
+
+## Create app from manifest
+
+In Slack:
+
+1. Go to `api.slack.com/apps` and choose `Create New App`.
+2. Select `From an app manifest`.
+3. Pick your workspace.
+4. Paste the YAML from [`slack/app-manifest.yaml`](/Volumes/tom-macmini-ssd-2tb/Documents/New%20project/slack/app-manifest.yaml).
+5. Create app, then install it to your workspace.
 
 ## Owner allowlist rule
 
@@ -38,6 +48,8 @@ ALLOWED_SLACK_USER_ID=U0123456789
 CLAUDBOT_WEBHOOK_PORT=3000
 CLAUDBOT_LOG_LEVEL=info
 ```
+
+You can also copy keys from [`.env.example`](/Volumes/tom-macmini-ssd-2tb/Documents/New%20project/.env.example).
 
 ## Initial security posture (best effort)
 

@@ -1,0 +1,10 @@
+aws_profile      = "mullet-dev"
+aws_region       = "us-west-2"
+state_bucket_name = "mullet-product-agent-tfstate-123456789012-us-west-2"
+lock_table_name  = "mullet-product-agent-tf-locks"
+
+tags = {
+  Project     = "mullet-product-agent"
+  Environment = "shared"
+  ManagedBy   = "terraform"
+}

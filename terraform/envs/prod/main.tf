@@ -27,8 +27,6 @@ resource "aws_lightsail_instance" "paige" {
 
 resource "aws_lightsail_static_ip" "paige" {
   name = "${local.name_prefix}-ip"
-
-  tags = local.common_tags
 }
 
 resource "aws_lightsail_static_ip_attachment" "paige" {

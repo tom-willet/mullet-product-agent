@@ -1,6 +1,6 @@
 # mullet-product-agent
 
-Terraform-managed AWS Lightsail deployment for `openclaw/claudbot` (agent name: **Paige**) with a WhatsApp-first communication path.
+Terraform-managed AWS Lightsail deployment for `openclaw/claudbot` (agent name: **Paige**) with a Slack-first communication path.
 
 ## What this repo manages
 
@@ -17,7 +17,7 @@ Terraform-managed AWS Lightsail deployment for `openclaw/claudbot` (agent name: 
 - Instance size: `nano_3_0` (Lightsail Linux/Unix $5 tier target)
 - OS image: `ubuntu_24_04`
 - Deployment method: Docker Compose (installed by cloud-init)
-- WhatsApp provider recommendation: **Twilio WhatsApp**
+- Slack integration recommendation: **Slack Socket Mode**
 - Secrets strategy (v1): server-local `.env` at `/opt/paige/.env` with strict file perms
 
 ## Prerequisites
@@ -63,9 +63,9 @@ sudo nano /opt/paige/.env
 sudo systemctl restart paige-claudbot
 ```
 
-## 4) WhatsApp onboarding
+## 4) Slack onboarding
 
-See [`docs/whatsapp-setup.md`](docs/whatsapp-setup.md).
+See [`docs/slack-setup.md`](docs/slack-setup.md).
 
 ## 5) Paige operating model
 

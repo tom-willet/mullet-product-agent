@@ -2,8 +2,8 @@
 set -euxo pipefail
 
 APP_ROOT="/opt/paige"
-REPO_DIR="${APP_ROOT}/claudbot"
-ENV_FILE="${APP_ROOT}/.env"
+REPO_DIR="$${APP_ROOT}/claudbot"
+ENV_FILE="$${APP_ROOT}/.env"
 DEPLOY_USER="${deploy_user}"
 REPO_URL="${claudbot_repo_url}"
 REPO_REF="${claudbot_repo_ref}"
@@ -18,57 +18,58 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 systemctl enable docker
 systemctl start docker
-usermod -aG docker "${DEPLOY_USER}" || true
+usermod -aG docker "$${DEPLOY_USER}" || true
 
-mkdir -p "${APP_ROOT}"
-chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "${APP_ROOT}"
+mkdir -p "$${APP_ROOT}"
+chown -R "$${DEPLOY_USER}:$${DEPLOY_USER}" "$${APP_ROOT}"
 
 cat >/usr/local/bin/paige-deploy.sh <<SCRIPT
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_ROOT="${APP_ROOT}"
-REPO_DIR="${REPO_DIR}"
-ENV_FILE="${ENV_FILE}"
-REPO_URL="${REPO_URL}"
-REPO_REF="${REPO_REF}"
+APP_ROOT="$${APP_ROOT}"
+REPO_DIR="$${REPO_DIR}"
+ENV_FILE="$${ENV_FILE}"
+REPO_URL="$${REPO_URL}"
+REPO_REF="$${REPO_REF}"
 
-if [[ ! -d "${REPO_DIR}/.git" ]]; then
-  rm -rf "${REPO_DIR}"
-  git clone --depth 1 --branch "${REPO_REF}" "${REPO_URL}" "${REPO_DIR}"
+if [[ ! -d "$${REPO_DIR}/.git" ]]; then
+  rm -rf "$${REPO_DIR}"
+  git clone --depth 1 --branch "$${REPO_REF}" "$${REPO_URL}" "$${REPO_DIR}"
 else
-  git -C "${REPO_DIR}" fetch --all --prune
-  git -C "${REPO_DIR}" checkout "${REPO_REF}"
-  git -C "${REPO_DIR}" pull --ff-only origin "${REPO_REF}"
+  git -C "$${REPO_DIR}" fetch --all --prune
+  git -C "$${REPO_DIR}" checkout "$${REPO_REF}"
+  git -C "$${REPO_DIR}" pull --ff-only origin "$${REPO_REF}"
 fi
 
-if [[ -f "${REPO_DIR}/docker-compose.yml" ]]; then
+if [[ -f "$${REPO_DIR}/docker-compose.yml" ]]; then
   COMPOSE_FILE="docker-compose.yml"
-elif [[ -f "${REPO_DIR}/compose.yml" ]]; then
+elif [[ -f "$${REPO_DIR}/compose.yml" ]]; then
   COMPOSE_FILE="compose.yml"
 else
-  echo "No compose file found in ${REPO_DIR}."
+  echo "No compose file found in $${REPO_DIR}."
   exit 1
 fi
 
-if [[ ! -f "${ENV_FILE}" ]]; then
-  cat >"${APP_ROOT}/.env.example" <<ENV
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
-ALLOWED_WHATSAPP_FROM=whatsapp:+1YOURNUMBER
+if [[ ! -f "$${ENV_FILE}" ]]; then
+  cat >"$${APP_ROOT}/.env.example" <<ENV
+SLACK_BOT_TOKEN=xoxb-
+SLACK_APP_TOKEN=xapp-
+SLACK_SIGNING_SECRET=
+SLACK_TEAM_ID=T0123456789
+ALLOWED_SLACK_USER_ID=U0123456789
 CLAUDBOT_WEBHOOK_PORT=3000
 CLAUDBOT_LOG_LEVEL=info
 ENV
-  chown "${DEPLOY_USER}:${DEPLOY_USER}" "${APP_ROOT}/.env.example"
-  chmod 600 "${APP_ROOT}/.env.example"
-  echo "Created ${APP_ROOT}/.env.example. Copy to ${ENV_FILE} and fill values."
+  chown "$${DEPLOY_USER}:$${DEPLOY_USER}" "$${APP_ROOT}/.env.example"
+  chmod 600 "$${APP_ROOT}/.env.example"
+  echo "Created $${APP_ROOT}/.env.example. Copy to $${ENV_FILE} and fill values."
   exit 0
 fi
 
-ln -sfn "${ENV_FILE}" "${REPO_DIR}/.env"
+ln -sfn "$${ENV_FILE}" "$${REPO_DIR}/.env"
 
-docker compose -f "${REPO_DIR}/${COMPOSE_FILE}" --env-file "${ENV_FILE}" up -d --remove-orphans
+docker compose -f "$${REPO_DIR}/$${COMPOSE_FILE}" --env-file "$${ENV_FILE}" up -d --remove-orphans
 SCRIPT
 
 chmod +x /usr/local/bin/paige-deploy.sh

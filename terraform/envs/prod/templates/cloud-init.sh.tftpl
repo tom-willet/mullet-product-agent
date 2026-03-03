@@ -9,6 +9,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
   ca-certificates \
   curl \
   git \
+  jq \
   openssl \
   docker.io \
   docker-compose-v2
@@ -78,6 +79,8 @@ SLACK_APP_TOKEN=xapp-
 SLACK_SIGNING_SECRET=
 SLACK_TEAM_ID=T0123456789
 ALLOWED_SLACK_USER_ID=U0123456789
+OPENCLAW_MODEL_PRIMARY=
+OPENCLAW_MODEL_FALLBACKS=
 OPENCLAW_GATEWAY_TOKEN=
 OPENCLAW_CONFIG_DIR=/opt/paige/state
 OPENCLAW_WORKSPACE_DIR=/opt/paige/workspace
@@ -135,6 +138,31 @@ cat >"$CONFIG_FILE" <<JSON
   }
 }
 JSON
+
+MODEL_PRIMARY="${OPENCLAW_MODEL_PRIMARY:-}"
+MODEL_FALLBACKS_RAW="${OPENCLAW_MODEL_FALLBACKS:-}"
+if [[ -n "$MODEL_PRIMARY" ]]; then
+  FALLBACKS_JSON="[]"
+  if [[ -n "$MODEL_FALLBACKS_RAW" ]]; then
+    IFS=',' read -r -a FALLBACKS_ARR <<<"$MODEL_FALLBACKS_RAW"
+    FALLBACKS_JSON="["
+    SEP=""
+    for fallback in "${FALLBACKS_ARR[@]}"; do
+      fallback="$(printf '%s' "$fallback" | sed -e 's/^ *//' -e 's/ *$//')"
+      [[ -z "$fallback" ]] && continue
+      FALLBACKS_JSON+="$SEP\"$fallback\""
+      SEP=","
+    done
+    FALLBACKS_JSON+="]"
+  fi
+
+  jq \
+    --arg model_primary "$MODEL_PRIMARY" \
+    --argjson model_fallbacks "$FALLBACKS_JSON" \
+    '. + {agents: ((.agents // {}) + {defaults: (((.agents // {}).defaults // {}) + {model: ((((.agents // {}).defaults // {}).model // {}) + {primary: $model_primary, fallbacks: $model_fallbacks})})})}' \
+    "$CONFIG_FILE" >"$CONFIG_FILE.tmp"
+  mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+fi
 
 if [[ -n "$${OPENCLAW_IMAGE:-}" ]] && ! docker image inspect "$OPENCLAW_IMAGE" >/dev/null 2>&1; then
   docker pull "$OPENCLAW_IMAGE"

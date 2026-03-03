@@ -35,9 +35,9 @@ variable "lightsail_blueprint_id" {
 }
 
 variable "lightsail_bundle_id" {
-  description = "Lightsail instance bundle (nano_3_0 targets $5/month Linux tier)"
+  description = "Lightsail instance bundle (small_3_0 provides 2GB RAM for stable OpenClaw runtime)"
   type        = string
-  default     = "nano_3_0"
+  default     = "small_3_0"
 }
 
 variable "ssh_public_key_path" {
@@ -76,9 +76,9 @@ variable "openclaw_repo_ref" {
 }
 
 variable "openclaw_image" {
-  description = "Prebuilt OpenClaw image to run on low-memory instances"
+  description = "Prebuilt OpenClaw image pinned for production stability"
   type        = string
-  default     = "ghcr.io/openclaw/openclaw:latest"
+  default     = "ghcr.io/openclaw/openclaw:2026.2.26"
 }
 
 variable "deploy_user" {

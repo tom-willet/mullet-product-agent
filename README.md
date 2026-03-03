@@ -36,6 +36,7 @@ terraform -chdir=terraform/bootstrap apply
 ```
 
 Capture outputs:
+
 - `state_bucket_name`
 - `lock_table_name`
 
@@ -62,6 +63,38 @@ sudo systemctl restart paige-claudbot
 ```
 
 Use [`.env.example`](/Volumes/tom-macmini-ssd-2tb/Documents/New%20project/.env.example) in this repo as the key template.
+
+### Deterministic Recovery/Reconcile (recommended)
+
+When the instance or SSH gets flaky, use one command from repo root instead of ad-hoc SSH surgery:
+
+```bash
+./scripts/recover_and_reconcile_paige.sh
+```
+
+What it does, end-to-end:
+
+- Stop/start instance with state waits
+- Refresh temporary Lightsail SSH credentials
+- Sync local `.env` to `/opt/paige/.env`
+- Restart `paige-claudbot`
+- Print a filtered health/log snapshot
+
+Required keys in local `.env`:
+
+- `SLACK_BOT_TOKEN`
+- `SLACK_APP_TOKEN`
+- `SLACK_SIGNING_SECRET`
+- `SLACK_TEAM_ID`
+- `ALLOWED_SLACK_USER_ID`
+- `OPENAI_API_KEY`
+
+Optional model defaults in local `.env` (applied on deploy):
+
+```env
+OPENCLAW_MODEL_PRIMARY=openai/gpt-5.2
+OPENCLAW_MODEL_FALLBACKS=openai/gpt-5.1-codex
+```
 
 ## 4) Slack onboarding
 

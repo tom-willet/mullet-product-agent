@@ -98,12 +98,20 @@ OPENCLAW_MODEL_FALLBACKS=openai/gpt-5.1-codex
 
 ## 4) Slack onboarding
 
-See [`docs/slack-setup.md`](docs/slack-setup.md).
+See [`slack-setup.md`](https://github.com/tom-willet/mullet-agent-platform/blob/main/docs/slack-setup.md).
 Slack app manifest: [`slack/app-manifest.yaml`](slack/app-manifest.yaml).
 
 ## 5) Paige operating model
 
-See [`docs/paige-operating-state.md`](docs/paige-operating-state.md).
+See [`paige-operating-state.md`](https://github.com/tom-willet/mullet-agent-platform/blob/main/docs/paige-operating-state.md).
+
+## 5.1) Multi-agent taxonomy and use cases
+
+See [`agent-taxonomy-and-use-cases.md`](https://github.com/tom-willet/mullet-agent-platform/blob/main/docs/agent-taxonomy-and-use-cases.md) for named agents (`Paige`, `Meeting Mary`, `Subscriber Sam`), shared utilities/tooling, and cross-agent workflows.
+
+## 5.2) Platform utilities roadmap
+
+See [`platform-utilities-roadmap.md`](https://github.com/tom-willet/mullet-agent-platform/blob/main/docs/platform-utilities-roadmap.md) for the implementation boundary between OpenClaw runtime capabilities and platform utilities we will build ourselves.
 
 ## 6) VPS capacity and usage checks
 

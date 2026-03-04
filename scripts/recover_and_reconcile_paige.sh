@@ -155,7 +155,7 @@ upsert OPENCLAW_IMAGE ghcr.io/openclaw/openclaw:latest
 upsert_if_missing_or_empty OPENCLAW_GATEWAY_TOKEN "$(openssl rand -hex 24)"
 upsert_if_missing_or_empty OPENCLAW_MODEL_PRIMARY openai/gpt-5.2
 upsert_if_missing_or_empty OPENCLAW_MODEL_FALLBACKS openai/gpt-5.1-codex
-upsert_if_missing_or_empty OPENCLAW_SLACK_DM_POLICY open
+upsert_if_missing_or_empty OPENCLAW_SLACK_DM_POLICY allowlist
 upsert_if_missing_or_empty NODE_OPTIONS --max-old-space-size=768
 
 ensure_trailing_newline
@@ -180,7 +180,7 @@ if [[ -z "$SLACK_BOT_TOKEN" || -z "$SLACK_APP_TOKEN" ]]; then
   exit 1
 fi
 if [[ -z "$SLACK_DM_POLICY" ]]; then
-  SLACK_DM_POLICY="open"
+  SLACK_DM_POLICY="allowlist"
 fi
 if [[ "$SLACK_DM_POLICY" != "open" && "$SLACK_DM_POLICY" != "allowlist" ]]; then
   echo "ERROR: OPENCLAW_SLACK_DM_POLICY must be 'open' or 'allowlist'" >&2
@@ -211,9 +211,33 @@ jq -n \
   --arg model_primary "$MODEL_PRIMARY" \
   --argjson model_fallbacks "$FALLBACKS_JSON" \
   '{
-    gateway: { mode: "local", auth: { token: $token } },
-    channels: { slack: { enabled: true, mode: "socket", botToken: $slack_bot_token, appToken: $slack_app_token, signingSecret: $slack_signing_secret, dmPolicy: $dm_policy, allowFrom: [$allowed], groupPolicy: "disabled" } },
-    agents: { defaults: { model: { primary: $model_primary, fallbacks: $model_fallbacks } } }
+    gateway: {
+      mode: "local",
+      auth: { token: $token },
+      controlUi: {
+        dangerouslyAllowHostHeaderOriginFallback: true,
+        allowedOrigins: ["*"]
+      }
+    },
+    channels: {
+      slack: {
+        enabled: true,
+        mode: "socket",
+        botToken: $slack_bot_token,
+        appToken: $slack_app_token,
+        signingSecret: $slack_signing_secret,
+        dmPolicy: $dm_policy,
+        allowFrom: [$allowed],
+        groupPolicy: "disabled",
+        streaming: "off",
+        nativeStreaming: false
+      }
+    },
+    agents: { defaults: { model: { primary: $model_primary, fallbacks: $model_fallbacks } } },
+    tools: {
+      profile: "messaging",
+      allow: ["cron"]
+    }
   }' >"$TMP"
 install -m 644 "$TMP" "$CFG"
 
@@ -339,13 +363,17 @@ fi
 
 if [[ "$DM_POLICY" == "open" ]]; then
   sudo jq --arg bot "$SLACK_BOT_TOKEN" --arg app "$SLACK_APP_TOKEN" --arg sign "$SLACK_SIGNING_SECRET" '.
-    | .channels = ((.channels // {}) + {slack: (((.channels // {}).slack // {}) + {mode: "socket", botToken: $bot, appToken: $app, signingSecret: $sign, dmPolicy: "open", allowFrom: ["*"]})})
+    | .gateway = ((.gateway // {}) + {controlUi: (((.gateway // {}).controlUi // {}) + {dangerouslyAllowHostHeaderOriginFallback: true, allowedOrigins: ["*"]})})
+    | .channels = ((.channels // {}) + {slack: (((.channels // {}).slack // {}) + {mode: "socket", botToken: $bot, appToken: $app, signingSecret: $sign, dmPolicy: "open", allowFrom: ["*"], streaming: "off", nativeStreaming: false})})
     | .agents = ((.agents // {}) + {defaults: (((.agents // {}).defaults // {}) + {model: ((((.agents // {}).defaults // {}).model // {}) + {primary: "openai/gpt-5.2", fallbacks: ["openai/gpt-5.1-codex"]})})})
+    | .tools = ((.tools // {}) + {profile: "messaging", allow: (((.tools // {}).allow // []) + ["cron"] | unique)})
   ' "$CFG" > "$TMP"
 else
   sudo jq --arg bot "$SLACK_BOT_TOKEN" --arg app "$SLACK_APP_TOKEN" --arg sign "$SLACK_SIGNING_SECRET" --arg allowed "$ALLOWED_USER" '.
-    | .channels = ((.channels // {}) + {slack: (((.channels // {}).slack // {}) + {mode: "socket", botToken: $bot, appToken: $app, signingSecret: $sign, dmPolicy: "allowlist", allowFrom: [$allowed]})})
+    | .gateway = ((.gateway // {}) + {controlUi: (((.gateway // {}).controlUi // {}) + {dangerouslyAllowHostHeaderOriginFallback: true, allowedOrigins: ["*"]})})
+    | .channels = ((.channels // {}) + {slack: (((.channels // {}).slack // {}) + {mode: "socket", botToken: $bot, appToken: $app, signingSecret: $sign, dmPolicy: "allowlist", allowFrom: [$allowed], streaming: "off", nativeStreaming: false})})
     | .agents = ((.agents // {}) + {defaults: (((.agents // {}).defaults // {}) + {model: ((((.agents // {}).defaults // {}).model // {}) + {primary: "openai/gpt-5.2", fallbacks: ["openai/gpt-5.1-codex"]})})})
+    | .tools = ((.tools // {}) + {profile: "messaging", allow: (((.tools // {}).allow // []) + ["cron"] | unique)})
   ' "$CFG" > "$TMP"
 fi
 sudo install -m 644 "$TMP" "$CFG"

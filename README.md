@@ -62,7 +62,7 @@ sudo nano /opt/paige/.env
 sudo systemctl restart paige-claudbot
 ```
 
-Use [`.env.example`](/Volumes/tom-macmini-ssd-2tb/Documents/New%20project/.env.example) in this repo as the key template.
+Use [`.env.example`](.env.example) in this repo as the key template.
 
 ### Deterministic Recovery/Reconcile (recommended)
 
@@ -109,3 +109,4 @@ See [`docs/paige-operating-state.md`](docs/paige-operating-state.md).
 
 - No custom domain is required for initial setup.
 - Start with best-effort ops; hardening can be added later (TLS, monitoring, secret manager, CI).
+- WARNING: Do not replace production with a fresh image unless explicitly requested and a restore plan is approved. A fresh image without restoring `/opt/paige/state` and `/opt/paige/workspace` can lose session context and runtime memory.

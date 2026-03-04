@@ -105,6 +105,40 @@ Slack app manifest: [`slack/app-manifest.yaml`](slack/app-manifest.yaml).
 
 See [`docs/paige-operating-state.md`](docs/paige-operating-state.md).
 
+## 6) VPS capacity and usage checks
+
+Run an on-demand usage report from your workstation:
+
+```bash
+./scripts/check_vps_usage.sh
+```
+
+The report includes:
+
+- Lightsail plan capacity (RAM, disk, transfer, price)
+- CPU average/peak for the last `HOURS` (default `24`)
+- In-guest memory/disk/docker usage and top memory processes
+- A sizing verdict: `right_sized`, `consider_downgrade`, or `upgrade_or_tune`
+
+Optional overrides:
+
+```bash
+HOURS=72 ./scripts/check_vps_usage.sh
+WARN_MEM_USED_PCT=80 WARN_DISK_USED_PCT=80 ./scripts/check_vps_usage.sh
+```
+
+Install a daily usage timer on the VPS (writes logs to `/opt/paige/logs/vps-usage.log`):
+
+```bash
+./scripts/install_vps_usage_timer.sh
+```
+
+Optional schedule override (systemd `OnCalendar` syntax):
+
+```bash
+TIMER_ONCALENDAR='*-*-* 07:30:00 UTC' ./scripts/install_vps_usage_timer.sh
+```
+
 ## Notes
 
 - No custom domain is required for initial setup.
